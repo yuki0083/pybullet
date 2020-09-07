@@ -14,8 +14,8 @@ import random
 class Pybullet_env(gym.Env):
     def __init__(self):
         #or p.DIRECT for non-graphical version
-        p.connect(p.DIRECT)
-        #p.connect(p.GUI)
+        #p.connect(p.DIRECT)
+        p.connect(p.GUI)
         p.setGravity(0, 0, -10)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
@@ -53,7 +53,8 @@ class Pybullet_env(gym.Env):
 
     # actionを実行し、結果を返す
     def step(self,actions):
-        p.connect(p.DIRECT)
+        #p.connect(p.DIRECT)
+        p.connect(p.GUI)
         self.step_num += 1
         action_throttle,action_angle = actions#actionsはタイヤの速度と角度の2要素のリストを想定
         for joint_index in self.wheel_indices:
@@ -97,7 +98,8 @@ class Pybullet_env(gym.Env):
 
     # 状態を初期化し、初期の観測値を返す
     def reset(self):
-        p.connect(p.DIRECT)
+        #p.connect(p.DIRECT)
+        p.connect(p.GUI)
         self.step_num = 0 #episode内でのstep数
         self.done = False#終了判定
         p.resetSimulation()#シミュレーション環境のリセット
