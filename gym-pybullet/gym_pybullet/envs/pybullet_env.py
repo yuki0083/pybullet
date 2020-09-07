@@ -98,6 +98,7 @@ class Pybullet_env(gym.Env):
     # 状態を初期化し、初期の観測値を返す
     def reset(self):
         p.connect(p.DIRECT)
+        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
         self.step_num = 0 #episode内でのstep数
         self.done = False#終了判定
         p.resetSimulation()#シミュレーション環境のリセット
