@@ -14,8 +14,8 @@ import random
 class Pybullet_env(gym.Env):
     def __init__(self):
         #or p.DIRECT for non-graphical version
-        #p.connect(p.DIRECT)
-        p.connect(p.GUI)
+        p.connect(p.DIRECT)
+        #p.connect(p.GUI)
         p.setGravity(0, 0, -10)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
