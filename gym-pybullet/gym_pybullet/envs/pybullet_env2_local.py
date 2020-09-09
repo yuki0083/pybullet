@@ -11,13 +11,13 @@ import numpy as np
 import random
 
 
-class Pybullet_env(gym.Env):
+class Pybullet_env2(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
         #or p.DIRECT for non-graphical version
-        p.connect(p.DIRECT)
-        #p.connect(p.GUI)
+        #p.connect(p.DIRECT)
+        p.connect(p.GUI)
         p.setGravity(0, 0, -10)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
@@ -30,9 +30,13 @@ class Pybullet_env(gym.Env):
         self.action_high = np.array([self.max_throttle, self.max_angle])
         self.action_space = spaces.Box(self.action_low, self.action_high, dtype=np.float32)#連続値の(2次元行動)空間を作る
 
+        # オブジェクトの位置の設定
+        self.num_of_objects = 3
+        # self.obj_poss_list = utils.make_obj_poss_list(self.num_of_objects,self.map_size)#objectの位置のリスト
+
         #set_observation_space
-        self.observation_space_camera = spaces.Box(low=0,high=1,shape=(42,42,1))#shape=(3,84,84,3)?　#segmentationのみにした(84,84,1) ###################################
-        self.observation_space_cordinate = spaces.Box(low=-15,high=15, shape=(2,))#low=-15でいいのか?
+        #self.observation_space_camera = spaces.Box(low=0,high=1,shape=(42,42,1))#shape=(3,84,84,3)?　#segmentationのみにした(84,84,1) ###################################
+        self.observation_space_cordinate = spaces.Box(low=-15,high=15, shape=((self.num_of_objects+1)*2,))#low=-15でいいのか?
 
         # carのプロパティ
         #self.carId = 0
@@ -41,9 +45,6 @@ class Pybullet_env(gym.Env):
         #self.position = [0,0,0]#初期位置
         #self.orientation = p.getQuaternionFromEuler([0, 0, 0])#初期クオータニオン
 
-        #オブジェクトの位置の設定
-        self.num_of_objects = 3
-        #self.obj_poss_list = utils.make_obj_poss_list(self.num_of_objects,self.map_size)#objectの位置のリスト
 
         #報酬の設定
         self.goal_reward = 1000
@@ -58,7 +59,7 @@ class Pybullet_env(gym.Env):
 
     # actionを実行し、結果を返す
     def step(self,actions):
-        p.connect(p.DIRECT)
+        #p.connect(p.DIRECT)
         self.step_num += 1
         action_throttle,action_angle = actions#actionsはタイヤの速度と角度の2要素のリストを想定
         for joint_index in self.wheel_indices:
@@ -81,28 +82,55 @@ class Pybullet_env(gym.Env):
         """
 
         for _ in range(100):#100stepごとに行動を更新し、報酬や状態を返す
-            if (self.is_goal() == True) or (self.is_collision() == True) or (self.step_num > self._max_episode_steps):
+            if self.is_goal() == True:
                 done = True
+                reward = self.goal_reward
+                break
+            elif self.is_collision() == True:
+                done =True
+                reward = self.collision_reward
+                break
+            elif self.step_num > self._max_episode_steps:
+                done = True
+                break
+            """if (self.is_goal() == True) or (self.is_collision() == True) or (self.step_num > self._max_episode_steps):
+                done = True
+            """
             p.stepSimulation()
+
+        print(reward)
 
         return state, reward, done,{}
 
     #状態を返す
     def get_observation(self):
+        """
         #カメラ画像を返す
         camera_pos, target_pos = env_utils.cal_camera_pos_and_target_pos(self.carId, 9)
         projectionMatrix = p.computeProjectionMatrixFOV(fov=120.0, aspect=1.0, nearVal=0.01, farVal=10.0)  # fovは視野角
         viewMatrix = p.computeViewMatrix(camera_pos, target_pos, [0, 0, 1])
         width, height, rgb, depth, segmentation = p.getCameraImage(42, 42, viewMatrix, projectionMatrix)   #########################################################
         #camera_img_list = [rgb,depth,segmentation] segmentaionのみに変更
+        """
         #車から見た目標地点までの相対位置を返す
-        relative_goal_pos_list = (np.array(self.goal_pos_list)-np.array(self.position[:-1])).tolist()
+        relative_goal_pos_x,relative_goal_pos_y = (np.array(self.goal_pos_list)-np.array(self.position[:-1])).tolist()
+        relative_pos_list = []
+        relative_pos_list.append(relative_goal_pos_x)
+        relative_pos_list.append(relative_goal_pos_y)
 
-        return [segmentation, relative_goal_pos_list]
+        for i in range(self.num_of_objects):
+            relative_obj_pos_x, relative_obj_pos_y = (np.array(self.obj_poss_list[i][:-1]) - np.array(self.position[:-1])).tolist()
+            relative_pos_list.append(relative_obj_pos_x)
+            relative_pos_list.append(relative_obj_pos_y)
+
+        #return [segmentation, relative_goal_pos_list]
+        #print(relative_pos_list)
+        return relative_pos_list
+
 
     # 状態を初期化し、初期の観測値を返す
     def reset(self):
-        p.connect(p.DIRECT)
+        #p.connect(p.DIRECT)
         self.step_num = 0 #episode内でのstep数
         self.done = False#終了判定
         p.resetSimulation()#シミュレーション環境のリセット
@@ -129,7 +157,7 @@ class Pybullet_env(gym.Env):
 
         #p.stepSimulation()
         #reward = self.get_reward
-        
+
         state = self.get_observation()  #resetでもstateを返す
         return  state
 

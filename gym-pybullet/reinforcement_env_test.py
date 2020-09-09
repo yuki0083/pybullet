@@ -1,8 +1,9 @@
 import gym
 import gym_pybullet
-env = gym.make('pybullet-v0')
-print('observation space camera: ', env.observation_space_camera)
-print('observation space cordinate: ', env.observation_space_cordinate)
+env = gym.make('pybullet-v2')
+#print('observation space camera: ', env.observation_space_camera.shape)
+print('observation space cordinate: ', env.observation_space_cordinate.shape[0])
+
 print('action space: ', env.action_space)
 
 env.reset()#今回の書き方では必要
