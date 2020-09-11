@@ -20,3 +20,13 @@ register(
     id='pybullet_local-v2',
     entry_point='gym_pybullet.envs:Pybullet_env2_local',
 )
+
+register(
+    id='pybullet_hanlde-v0',
+    entry_point='gym_pybullet.envs:Pybullet_env_handle',
+)
+
+register(
+    id='pybullet_handle_local-v0',
+    entry_point='gym_pybullet.envs:Pybullet_env_handle_local',
+)

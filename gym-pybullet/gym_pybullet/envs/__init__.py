@@ -2,3 +2,5 @@ from gym_pybullet.envs.pybullet_env import Pybullet_env
 from gym_pybullet.envs.pybullet_env2 import Pybullet_env2
 from gym_pybullet.envs.pybullet_env2_local import Pybullet_env2_local
 from gym_pybullet.envs.pybullet_env_local import Pybullet_env_local
+from gym_pybullet.envs.pybullet_env_handle import Pybullet_env_handle
+from gym_pybullet.envs.pybullet_env_handle_local import Pybullet_env_handle_local
