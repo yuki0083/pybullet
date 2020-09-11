@@ -36,7 +36,7 @@ class Pybullet_env2(gym.Env):
 
         #set_observation_space
         #self.observation_space_camera = spaces.Box(low=0,high=1,shape=(42,42,1))#shape=(3,84,84,3)?　#segmentationのみにした(84,84,1) ###################################
-        self.observation_space_cordinate = spaces.Box(low=-15,high=15, shape=((self.num_of_objects+1)*2,))#low=-15でいいのか?
+        self.observation_space = spaces.Box(low=-15,high=15, shape=((self.num_of_objects+1)*2,))#low=-15でいいのか?
 
         # carのプロパティ
         #self.carId = 0
@@ -46,12 +46,13 @@ class Pybullet_env2(gym.Env):
         #self.orientation = p.getQuaternionFromEuler([0, 0, 0])#初期クオータニオン
 
 
-        #報酬の設定
-        self.goal_reward = 1000
-        self.collision_reward = -100
+        #報酬の設定 ###########################################################################################################ハイパラ
+        self.goal_reward = 1
+        self.collision_reward = -0.5
+        self.time_reward = -0.1
         
         #1epidodeでの最大step数
-        self._max_episode_steps = 1000
+        self._max_episode_steps = 100
 
         
         #mapの一辺の大きさ
@@ -72,8 +73,13 @@ class Pybullet_env2(gym.Env):
                                     targetPosition=action_angle)
         # 車の位置を取得
         self.position, self.orientation = p.getBasePositionAndOrientation(self.carId)
-        reward = self.get_reward()
         state = self.get_observation()
+        
+        self.time_reward = -(state[0]**2 + state[1]**2)/(self.map_size*2**2*2)#ゴールまでの距離を報酬にする
+        
+        reward = self.get_reward()
+        
+        
         done = self.done
         """
         if (self.is_goal() == True) or (self.is_collision()==True)or(self.step_num>self.max_step_num):#1stepごとに行動を選択
@@ -87,18 +93,21 @@ class Pybullet_env2(gym.Env):
                 reward = self.goal_reward
                 break
             elif self.is_collision() == True:
-                done =True
+                #done =True #当たっても終わりにしない
                 reward = self.collision_reward
-                break
-            elif self.step_num > self._max_episode_steps:
+                #break
+            """elif self.step_num > self._max_episode_steps:
                 done = True
-                break
+                break"""
+            
             """if (self.is_goal() == True) or (self.is_collision() == True) or (self.step_num > self._max_episode_steps):
                 done = True
             """
             p.stepSimulation()
 
-        print(reward)
+        #print(reward)
+        if self.step_num > self._max_episode_steps:
+            done = True
 
         return state, reward, done,{}
 
@@ -122,6 +131,8 @@ class Pybullet_env2(gym.Env):
             relative_obj_pos_x, relative_obj_pos_y = (np.array(self.obj_poss_list[i][:-1]) - np.array(self.position[:-1])).tolist()
             relative_pos_list.append(relative_obj_pos_x)
             relative_pos_list.append(relative_obj_pos_y)
+            
+        relative_pos_list = np.array(relative_pos_list)
 
         #return [segmentation, relative_goal_pos_list]
         #print(relative_pos_list)
@@ -130,10 +141,10 @@ class Pybullet_env2(gym.Env):
 
     # 状態を初期化し、初期の観測値を返す
     def reset(self):
+        p.resetSimulation()#シミュレーション環境のリセット
         #p.connect(p.DIRECT)
         self.step_num = 0 #episode内でのstep数
         self.done = False#終了判定
-        p.resetSimulation()#シミュレーション環境のリセット
         p.setGravity(0, 0, -10)#resetした後、重力再設定
         self.planeId = p.loadURDF("plane.urdf")#床の読み込み
 
@@ -168,12 +179,12 @@ class Pybullet_env2(gym.Env):
         elif self.is_collision():#接触した時
             return self.collision_reward
         else:
-            return -1 #1stepごとに-1
+            return self.time_reward #1stepごとに-1
 
     #goal判定
     def is_goal(self):
         flag = False
-        self.error = 0.1 #positionの許容範囲
+        self.error = 0.5 #positionの許容範囲
         if (self.goal_pos_list[0]-self.error<self.position[0]<self.goal_pos_list[0]+self.error)\
                 and (self.goal_pos_list[1]-self.error<self.position[1]<self.goal_pos_list[1]+self.error):
             flag = True
