@@ -3,7 +3,7 @@ import pybullet_data
 from time import sleep
 import numpy as np
 import math
-import utils
+import utils_test
 
 p.connect(p.GUI)
 p.setGravity(0, 0, -10)
@@ -20,8 +20,9 @@ print("robotId:", carId)
 
 
 #objectを作成
-utils.make_object(urdf_path="block.urdf", start_pos=[2,0,0], start_orientation=[0,0,0],obj_num=1)
-utils.make_object(urdf_path="block.urdf", start_pos=[1,1,0], start_orientation=[0,0,1.57],obj_num=2)
+cube_path = 'C:/Users/yuki/PycharmProjects/pybullet/gym-pybullet/URDF/cube.urdf'
+utils_test.make_object(urdf_path=cube_path, start_pos=[2,0,0], start_orientation=[0,0,0],obj_num=1)
+utils_test.make_object(urdf_path="block.urdf", start_pos=[1,1,0], start_orientation=[0,0,1.57],obj_num=2)
 
 
 
@@ -59,7 +60,7 @@ while True:
         flag = True
 
     #車載カメラ
-    camera_pos, target_pos = utils.cal_camera_pos_and_target_pos(carId, 9)
+    camera_pos, target_pos = utils_test.cal_camera_pos_and_target_pos(carId, 9)
     projectionMatrix = p.computeProjectionMatrixFOV(fov=120.0, aspect=1.0, nearVal=0.01, farVal=10.0)#fovは視野角
     viewMatrix = p.computeViewMatrix(camera_pos,target_pos,[0,0,1])
     p.getCameraImage(80, 80, viewMatrix,projectionMatrix)

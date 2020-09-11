@@ -11,7 +11,7 @@ import numpy as np
 import random
 
 
-class Pybullet_env2(gym.Env):
+class Pybullet_env2_local(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
@@ -85,20 +85,21 @@ class Pybullet_env2(gym.Env):
             if self.is_goal() == True:
                 done = True
                 reward = self.goal_reward
+                print('goal!!')
                 break
             elif self.is_collision() == True:
                 done =True
                 reward = self.collision_reward
+                print('ouch!!')
                 break
             elif self.step_num > self._max_episode_steps:
                 done = True
+                print('timeout!!')
                 break
             """if (self.is_goal() == True) or (self.is_collision() == True) or (self.step_num > self._max_episode_steps):
                 done = True
             """
             p.stepSimulation()
-
-        print(reward)
 
         return state, reward, done,{}
 

@@ -6,6 +6,17 @@ register(
 )                   #__ini__.pyでPybullet_envをimportしているのでpybullet_envは書かなくていい
 
 register(
+    id='pybullet_local-v0',
+    entry_point='gym_pybullet.envs:Pybullet_env_local',
+)
+
+
+register(
     id='pybullet-v2',
     entry_point='gym_pybullet.envs:Pybullet_env2',#pybullet_env2.pyの中のPybullet_env2クラス
-)                   #__ini__.pyでPybullet_envをimportしているのでpybullet_envは書かなくていい
+)                   #__ini__.pyでPybullet_env2をimportしているのでpybullet_env2は書かなくていい
+
+register(
+    id='pybullet_local-v2',
+    entry_point='gym_pybullet.envs:Pybullet_env2_local',
+)
