@@ -22,7 +22,7 @@ class Pybullet_env_local(gym.Env):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
         # set_action_space
-        self.min_throttle = -20
+        self.min_throttle = 5 #最低速度を変更
         self.max_throttle = 20
         self.min_angle = -0.5
         self.max_angle = 0.5
@@ -51,7 +51,7 @@ class Pybullet_env_local(gym.Env):
         self.collision_reward = -0.5
 
         # 1epidodeでの最大step数
-        self._max_episode_steps = 1000
+        self._max_episode_steps = 10000
 
         # mapの一辺の大きさ
         self.map_size = 5
@@ -94,8 +94,9 @@ class Pybullet_env_local(gym.Env):
             elif self.is_collision() == True:
                 # done =True #当たっても終わりにしない
                 reward = self.collision_reward
+                done = True
                 print('ouch')
-                # break
+                break
             """elif self.step_num > self._max_episode_steps:
                 done = True
                 break"""

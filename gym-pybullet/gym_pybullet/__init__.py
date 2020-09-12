@@ -22,7 +22,7 @@ register(
 )
 
 register(
-    id='pybullet_hanlde-v0',
+    id='pybullet_handle-v0',
     entry_point='gym_pybullet.envs:Pybullet_env_handle',
 )
 

@@ -24,11 +24,11 @@ class Pybullet_env_handle(gym.Env):
         #set_action_space
         #self.min_throttle = -20
         #self.max_throttle = 20
-        self.action_throttle = 10
+        self.action_throttle = 5
         self.min_angle = -0.5
         self.max_angle = 0.5
-        self.action_low = np.array(self.min_angle)#min(max)をndarray(2,)で書くことで行動空間も(2,)になる
-        self.action_high = np.array(self.max_angle)
+        self.action_low = np.array([self.min_angle])#min(max)をndarray(2,)で書くことで行動空間も(2,)になる
+        self.action_high = np.array([self.max_angle])
         self.action_space = spaces.Box(self.action_low, self.action_high, dtype=np.float32)#連続値の(2次元行動)空間を作る
 
         #set_observation_space
@@ -51,7 +51,7 @@ class Pybullet_env_handle(gym.Env):
         self.collision_reward = -0.5
         
         #1epidodeでの最大step数
-        self._max_episode_steps = 100
+        self._max_episode_steps = 10000
 
         
         #mapの一辺の大きさ
@@ -89,7 +89,7 @@ class Pybullet_env_handle(gym.Env):
         p.stepSimulation()
         """
 
-        for _ in range(100):#100stepごとに行動を更新し、報酬や状態を返す
+        for _ in range(5):#100stepごとに行動を更新し、報酬や状態を返す
             if self.is_goal() == True:
                 done = True
                 reward = self.goal_reward
