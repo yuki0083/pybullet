@@ -6,7 +6,7 @@ import numpy as np
 
 weights_path = './weights/PPO_camera50000steps.pth'
 
-env = gym.make('pybullet_local-v0')
+env = gym.make('pybullet-v0')
 state_pos_shape = env.observation_space_cordinate.shape
 state_camera_shape = env.observation_space_camera.shape
 action_space = env.action_space.shape

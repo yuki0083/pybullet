@@ -1,1 +1,4 @@
 gym-pybullet/weights/
+__pycache__/
+.idea/
+gym-pybullet/__pycache__/

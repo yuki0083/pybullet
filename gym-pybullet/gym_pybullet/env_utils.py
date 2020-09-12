@@ -21,7 +21,7 @@ def cal_camera_pos_and_target_pos(carId,link_id):
     return camera_pos,target_pos
 
 #objectを作成
-def make_object(urdf_path, start_pos, start_orientation, globalScaling=10):
+def make_object(urdf_path, start_pos, start_orientation, globalScaling=20):
     cubeStartPos = start_pos
     cubeStartOrientation = p.getQuaternionFromEuler(start_orientation)
     obId = p.loadURDF(urdf_path, cubeStartPos, cubeStartOrientation, globalScaling=globalScaling)
@@ -41,3 +41,27 @@ def make_obj_poss_list(num_of_objects,map_size):
         obj_pos_list = set_random_point(map_size)
         obj_poss_list.append(obj_pos_list)
     return obj_poss_list
+
+def set_random_lattice_point(map_size):#格子点上の座標を取得(-1,0,1)は除く
+    out_points = [0]
+    while True:
+        x_cordinate = random.randint(-map_size / 2, map_size / 2)
+        if not x_cordinate in out_points:
+            break
+    while True:
+        y_cordinate = random.randint(-map_size / 2, map_size / 2)
+        if not x_cordinate in out_points:
+            break
+    return [x_cordinate, y_cordinate]
+
+
+def make_obj_lattice_poss_list(num_of_objects,map_size,goal_pos):#オブジェクトの座標(格子点上)
+    obj_poss_lists = []
+    while True:
+        obj_pos_list = set_random_lattice_point(map_size)
+        if (obj_pos_list != goal_pos)and(obj_pos_list not in obj_poss_lists):
+            obj_poss_lists.append(obj_pos_list)
+        if len(obj_poss_lists)==num_of_objects:
+            break
+    return obj_poss_lists
+

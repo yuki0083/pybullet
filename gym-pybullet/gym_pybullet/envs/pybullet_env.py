@@ -31,8 +31,8 @@ class Pybullet_env(gym.Env):
         self.action_space = spaces.Box(self.action_low, self.action_high, dtype=np.float32)#連続値の(2次元行動)空間を作る
 
         #set_observation_space
-        self.observation_space_camera = spaces.Box(low=0,high=1,shape=(84,84,1))#shape=(3,84,84,3)?　#segmentationのみにした(84,84,1) ###################################
-        self.observation_space_cordinate = spaces.Box(low=-15,high=15, shape=(2,))#low=-15でいいのか?
+        self.observation_space_camera = spaces.Box(low=-100,high=100,shape=(84,84,1))#shape=(3,84,84,3)?　#segmentationのみにした(84,84,1) ###################################
+        self.observation_space_cordinate = spaces.Box(low=-100,high=100, shape=(2,))#low=-15でいいのか?
 
         # carのプロパティ
         #self.carId = 0
@@ -42,7 +42,7 @@ class Pybullet_env(gym.Env):
         #self.orientation = p.getQuaternionFromEuler([0, 0, 0])#初期クオータニオン
 
         #オブジェクトの位置の設定
-        self.num_of_objects = 3
+        self.num_of_objects = 15
         #self.obj_poss_list = utils.make_obj_poss_list(self.num_of_objects,self.map_size)#objectの位置のリスト
 
         #報酬の設定
@@ -50,17 +50,17 @@ class Pybullet_env(gym.Env):
         self.collision_reward = -0.5
         
         #1epidodeでの最大step数
-        self._max_episode_steps = 100
+        self._max_episode_steps = 1000
 
         
         #mapの一辺の大きさ
-        self.map_size = 5
+        self.map_size = 6
 
     # actionを実行し、結果を返す
     def step(self,actions):
         #p.connect(p.DIRECT)
         self.step_num += 1
-        action_throttle,action_angle = actions#actionsはタイヤの速度と角度の2要素のリストを想定
+        action_throttle,action_angle = actions[0]#actionsはタイヤの速度と角度の2要素のリストを想定
         for joint_index in self.wheel_indices:
             p.setJointMotorControl2(self.carId, joint_index,
                                     p.VELOCITY_CONTROL,
@@ -74,7 +74,7 @@ class Pybullet_env(gym.Env):
         
         state = self.get_observation()
         
-        self.time_reward = -(state[1][0]**2 + state[1][1]**2)/(self.map_size*2**2*2)#ゴールまでの距離を報酬にする
+        self.time_reward = -(state[1][0]**2 + state[1][1]**2)/(self.map_size**2*2)#ゴールまでの距離を報酬にする
         
         reward = self.get_reward()
         
@@ -86,7 +86,7 @@ class Pybullet_env(gym.Env):
         p.stepSimulation()
         """
 
-        for _ in range(100):#100stepごとに行動を更新し、報酬や状態を返す
+        for _ in range(5):#100stepごとに行動を更新し、報酬や状態を返す
             if self.is_goal() == True:
                 done = True
                 reward = self.goal_reward
@@ -133,7 +133,8 @@ class Pybullet_env(gym.Env):
         self.planeId = p.loadURDF("plane.urdf")#床の読み込み
 
         #目標位置の設定
-        self.goal_pos_list = env_utils.set_random_point(self.map_size)#(x,y)
+        #self.goal_pos_list = env_utils.set_random_point(self.map_size)#(x,y)
+        self.goal_pos_list = env_utils.set_random_lattice_point(self.map_size)  # 格子点
 
 
         #車の読み込み
@@ -143,11 +144,11 @@ class Pybullet_env(gym.Env):
 
         #objectの読み込み
         self.obj_id_list = []#obj_idを格納
-        self.obj_poss_list = env_utils.make_obj_poss_list(self.num_of_objects, self.map_size)  # objectの位置のリストを取得
+        self.obj_poss_list = env_utils.make_obj_lattice_poss_list(self.num_of_objects, self.map_size,self.goal_pos_list)  # objectの位置のリストを取得
         for obj_poss_list in self.obj_poss_list:
             obj_poss_list.append(0)#(x,y,0)とする
-            obj_orientation = [0, 0, random.uniform(0,6.28)]#yowをランダムに選択
-            ob_id = env_utils.make_object(urdf_path="block.urdf", start_pos=obj_poss_list, start_orientation=obj_orientation)
+            obj_orientation = [0, 0, 0]#yowをランダムに選択
+            ob_id = env_utils.make_object(urdf_path="./URDF/cube.urdf", start_pos=obj_poss_list, start_orientation=obj_orientation)
             self.obj_id_list.append(ob_id)
 
         #p.stepSimulation()
