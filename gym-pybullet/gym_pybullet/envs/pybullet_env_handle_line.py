@@ -82,7 +82,7 @@ class Pybullet_env_handle_line(gym.Env):
         self.time_reward = -(self.map_size_x / 2 + 1 - self.position[0]) / 100  # ゴールまでの距離を報酬にする
 
         reward = self.get_reward()
-        print(reward)
+        #print(reward)
 
         done = self.done
         """
