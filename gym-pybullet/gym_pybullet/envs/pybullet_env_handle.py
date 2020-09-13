@@ -51,7 +51,7 @@ class Pybullet_env_handle(gym.Env):
         self.collision_reward = -0.5
         
         #1epidodeでの最大step数
-        self._max_episode_steps = 1000
+        self._max_episode_steps = 10000
 
         
         #mapの一辺の大きさ

@@ -4,7 +4,7 @@ import gym_pybullet
 from PPO_utils import PPOActor_camera
 import numpy as np
 
-weights_path = './weights/PPO_camera_handle50000steps.pth'
+weights_path = './weights/PPO_camera_handle_line_500000steps.pth'
 
 env = gym.make('pybullet_handle_line_local-v0')
 state_pos_shape = env.observation_space_cordinate.shape

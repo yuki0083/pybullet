@@ -52,7 +52,7 @@ class Pybullet_env_handle_line_local(gym.Env):
         self.collision_reward = -0.5
 
         # 1epidodeでの最大step数
-        self._max_episode_steps = 1000
+        self._max_episode_steps = 10000
 
         # mapの一辺の大きさ
         # self.map_size = 6
@@ -82,7 +82,7 @@ class Pybullet_env_handle_line_local(gym.Env):
         self.time_reward = -(self.map_size_x / 2 + 1 - self.position[0]) / 100  # ゴールまでの距離を報酬にする
 
         reward = self.get_reward()
-        print(reward)
+        #print(reward)
 
         done = self.done
         """
@@ -91,7 +91,7 @@ class Pybullet_env_handle_line_local(gym.Env):
         p.stepSimulation()
         """
 
-        for _ in range(5):  # 100stepごとに行動を更新し、報酬や状態を返す
+        for _ in range(3):  # 100stepごとに行動を更新し、報酬や状態を返す
             if self.is_goal() == True:
                 done = True
                 reward = self.goal_reward
