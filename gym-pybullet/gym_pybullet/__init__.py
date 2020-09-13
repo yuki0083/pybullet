@@ -30,3 +30,13 @@ register(
     id='pybullet_handle_local-v0',
     entry_point='gym_pybullet.envs:Pybullet_env_handle_local',
 )
+
+register(
+    id='pybullet_handle_line-v0',
+    entry_point='gym_pybullet.envs:Pybullet_env_handle_line',
+)
+
+register(
+    id='pybullet_handle_line_local-v0',
+    entry_point='gym_pybullet.envs:Pybullet_env_handle_line_local',
+)

@@ -153,7 +153,7 @@ class Pybullet_env_handle_local(gym.Env):
         self.obj_id_list = []#obj_idを格納
         self.obj_poss_list = env_utils.make_obj_lattice_poss_list(self.num_of_objects, self.map_size,self.goal_pos_list)  # objectの位置のリストを取得
         for obj_poss_list in self.obj_poss_list:
-            obj_poss_list.append(0)#(x,y,0)とする
+            obj_poss_list.append(0.18)#(x,y,0)とする
             obj_orientation = [0, 0, 0]#yowをランダムに選択
             ob_id = env_utils.make_object(urdf_path="./URDF/cube.urdf", start_pos=obj_poss_list, start_orientation=obj_orientation)
             self.obj_id_list.append(ob_id)

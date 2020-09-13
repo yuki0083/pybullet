@@ -11,7 +11,7 @@ import numpy as np
 import random
 
 
-class Pybullet_env_local(gym.Env):
+class Pybullet_env_handle_line_local(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
@@ -22,12 +22,13 @@ class Pybullet_env_local(gym.Env):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
         # set_action_space
-        self.min_throttle = -20 #最低速度を変更
-        self.max_throttle = 20
+        # self.min_throttle = -20
+        # self.max_throttle = 20
+        self.action_throttle = 5
         self.min_angle = -0.5
         self.max_angle = 0.5
-        self.action_low = np.array([self.min_throttle, self.min_angle])  # min(max)をndarray(2,)で書くことで行動空間も(2,)になる
-        self.action_high = np.array([self.max_throttle, self.max_angle])
+        self.action_low = np.array([self.min_angle])  # min(max)をndarray(2,)で書くことで行動空間も(2,)になる
+        self.action_high = np.array([self.max_angle])
         self.action_space = spaces.Box(self.action_low, self.action_high, dtype=np.float32)  # 連続値の(2次元行動)空間を作る
 
         # set_observation_space
@@ -54,14 +55,17 @@ class Pybullet_env_local(gym.Env):
         self._max_episode_steps = 1000
 
         # mapの一辺の大きさ
-        self.map_size = 6
+        # self.map_size = 6
+        self.map_size_x = 8
+        self.map_size_y = 2
 
     # actionを実行し、結果を返す
     def step(self, actions):
         # p.connect(p.DIRECT)
         self.step_num += 1
-        action_throttle, action_angle = actions[0]  # actionsはタイヤの速度と角度の2要素のリストを想定
-        action_throttle = action_throttle
+        # action_throttle,action_angle = actions#actionsはタイヤの速度と角度の2要素のリストを想定
+        action_throttle = self.action_throttle
+        action_angle = actions
         for joint_index in self.wheel_indices:
             p.setJointMotorControl2(self.carId, joint_index,
                                     p.VELOCITY_CONTROL,
@@ -75,9 +79,10 @@ class Pybullet_env_local(gym.Env):
 
         state = self.get_observation()
 
-        self.time_reward = -(state[1][0] ** 2 + state[1][1] ** 2) / (self.map_size ** 2 * 2)  # ゴールまでの距離を報酬にする
+        self.time_reward = -(self.map_size_x / 2 + 1 - self.position[0]) / 100  # ゴールまでの距離を報酬にする
 
         reward = self.get_reward()
+        print(reward)
 
         done = self.done
         """
@@ -90,13 +95,10 @@ class Pybullet_env_local(gym.Env):
             if self.is_goal() == True:
                 done = True
                 reward = self.goal_reward
-                print('goal!!')
                 break
             elif self.is_collision() == True:
-                # done =True #当たっても終わりにしない
+                done =True #当たっても終わりにしない
                 reward = self.collision_reward
-                done = True
-                print('ouch')
                 break
             """elif self.step_num > self._max_episode_steps:
                 done = True
@@ -108,7 +110,6 @@ class Pybullet_env_local(gym.Env):
             p.stepSimulation()
 
         if self.step_num > self._max_episode_steps:
-            print('timeout')
             done = True
 
         return state, reward, done, {}
@@ -123,9 +124,11 @@ class Pybullet_env_local(gym.Env):
                                                                    projectionMatrix)  #########################################################
         # camera_img_list = [rgb,depth,segmentation] segmentaionのみに変更
         # 車から見た目標地点までの相対位置を返す
-        relative_goal_pos_list = (np.array(self.goal_pos_list) - np.array(self.position[:-1])).tolist()
+        # relative_goal_pos_list = (np.array(self.goal_pos_list)-np.array(self.position[:-1])).tolist()
+        # 自分の位置を状態とする
+        self_pos_list = self.position[:-1]
 
-        return [segmentation, relative_goal_pos_list]
+        return [segmentation, self.position[:-1]]
 
     # 状態を初期化し、初期の観測値を返す
     def reset(self):
@@ -137,23 +140,29 @@ class Pybullet_env_local(gym.Env):
         self.planeId = p.loadURDF("plane.urdf")  # 床の読み込み
 
         # 目標位置の設定
-        #self.goal_pos_list = env_utils.set_random_point(self.map_size)  # (x,y)
-        self.goal_pos_list = env_utils.set_random_lattice_point(self.map_size)  # 格子点
+        # self.goal_pos_list = env_utils.set_random_lattice_point(self.map_size)#(x,y)
+        self.goal_x = 5  # x座標5がgoal
 
         # 車の読み込み
-        self.position = [0, 0, 0]  # 初期位置
+        self.position = [-6, 0, 0]  # 初期位置
         self.orientation = p.getQuaternionFromEuler([0, 0, 0])  # 初期クオータニオン
         self.carId = p.loadURDF("racecar/racecar.urdf", self.position, self.orientation)
 
         # objectの読み込み
         self.obj_id_list = []  # obj_idを格納
-        self.obj_poss_list = env_utils.make_obj_lattice_poss_list(self.num_of_objects, self.map_size,self.goal_pos_list)   # objectの位置のリストを取得
+        self.obj_poss_list = env_utils.make_obj_lattice_poss_list_for_line(self.num_of_objects, self.map_size_x,
+                                                                           self.map_size_y)  # objectの位置のリストを取得
         for obj_poss_list in self.obj_poss_list:
             obj_poss_list.append(0.18)  # (x,y,0)とする
             obj_orientation = [0, 0, 0]  # yowをランダムに選択
             ob_id = env_utils.make_object(urdf_path="./URDF/cube.urdf", start_pos=obj_poss_list,
-                                          start_orientation=obj_orientation)#urdf_pathは実行するreinforce.pyからの相対パス
+                                          start_orientation=obj_orientation)
             self.obj_id_list.append(ob_id)
+
+        # 壁の作成
+        wall_objId = env_utils.make_wall_for_line("./URDF/wall.urdf", self.map_size_y + 2)
+        for i in range(2):
+            self.obj_id_list.append(wall_objId[i])
 
         # p.stepSimulation()
         # reward = self.get_reward
@@ -173,9 +182,7 @@ class Pybullet_env_local(gym.Env):
     # goal判定
     def is_goal(self):
         flag = False
-        self.error = 0.1  # positionの許容範囲
-        if (self.goal_pos_list[0] - self.error < self.position[0] < self.goal_pos_list[0] + self.error) \
-                and (self.goal_pos_list[1] - self.error < self.position[1] < self.goal_pos_list[1] + self.error):
+        if self.position[0] > self.map_size_x / 2 + 1:
             flag = True
         return flag
 

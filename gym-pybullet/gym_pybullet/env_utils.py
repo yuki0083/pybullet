@@ -28,6 +28,23 @@ def make_object(urdf_path, start_pos, start_orientation, globalScaling=20):
     return obId
     #print("ob{}Id:".format(obj_num), obId)
 
+def make_wall(urdf_path, map_size):
+    obId_list = []
+    wall_z_cordinate = 0.18
+    wall_pos_list = [[0,(map_size+2)/2,wall_z_cordinate], [0,-(map_size+2)/2,wall_z_cordinate], [(map_size+2)/2,0,wall_z_cordinate], [-(map_size+2)/2,0,wall_z_cordinate]]
+    cubeStartOrientation1 = p.getQuaternionFromEuler([0, 0, 0])
+    cubeStartOrientation2 = p.getQuaternionFromEuler([0, 0, 1.57])
+    for i in range(2):
+        cubeStartPos = wall_pos_list[i]
+        obId = p.loadURDF(urdf_path,cubeStartPos,cubeStartOrientation1,globalScaling=20)
+        obId_list.append(obId)
+    for i in [2,3]:
+        cubeStartPos = wall_pos_list[i]
+        obId = p.loadURDF(urdf_path, cubeStartPos, cubeStartOrientation2,globalScaling=20)
+        obId_list.append(obId)
+
+    return obId_list
+
 #マップ内で座標をランダムに設定する関数
 def set_random_point(map_size):
     x_cordinate = random.uniform(-map_size / 2, map_size / 2)
@@ -65,3 +82,34 @@ def make_obj_lattice_poss_list(num_of_objects,map_size,goal_pos):#オブジェ�
             break
     return obj_poss_lists
 
+#pybullet_env_handle_line用の関数
+def set_random_lattice_point_for_line(map_size_x,map_size_y):
+        x_cordinate = random.randint(-map_size_x / 2, map_size_x / 2)
+        y_cordinate = random.randint(-map_size_y / 2, map_size_y / 2)
+        return [x_cordinate, y_cordinate]
+
+
+
+
+def make_obj_lattice_poss_list_for_line(num_of_objects,map_size_x,map_size_y):#オブジェクトの座標(格子点上)
+    obj_poss_lists = []
+    while True:
+        obj_pos_list = set_random_lattice_point_for_line(map_size_x,map_size_y)
+        if obj_pos_list not in obj_poss_lists:
+            obj_poss_lists.append(obj_pos_list)
+        if len(obj_poss_lists)==num_of_objects:
+            break
+    return obj_poss_lists
+
+
+def make_wall_for_line(urdf_path, lines_distance):
+    obId_list = []
+    wall_z_cordinate = 0.18
+    wall_pos_list = [[0, lines_distance/ 2, wall_z_cordinate], [0, -lines_distance / 2, wall_z_cordinate]]
+    cubeStartOrientation1 = p.getQuaternionFromEuler([0, 0, 0])
+    for i in wall_pos_list:
+        cubeStartPos = i
+        obId = p.loadURDF(urdf_path, cubeStartPos, cubeStartOrientation1, globalScaling=20)
+        obId_list.append(obId)
+
+    return obId_list
