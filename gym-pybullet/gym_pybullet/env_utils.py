@@ -21,7 +21,7 @@ def cal_camera_pos_and_target_pos(carId,link_id):
     return camera_pos,target_pos
 
 #objectを作成
-def make_object(urdf_path, start_pos, start_orientation, globalScaling=10):
+def make_object(urdf_path, start_pos, start_orientation, globalScaling=20):
     cubeStartPos = start_pos
     cubeStartOrientation = p.getQuaternionFromEuler(start_orientation)
     obId = p.loadURDF(urdf_path, cubeStartPos, cubeStartOrientation, globalScaling=globalScaling)

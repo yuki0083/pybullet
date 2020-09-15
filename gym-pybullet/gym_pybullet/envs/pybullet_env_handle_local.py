@@ -43,7 +43,7 @@ class Pybullet_env_handle_local(gym.Env):
         #self.orientation = p.getQuaternionFromEuler([0, 0, 0])#初期クオータニオン
 
         #オブジェクトの位置の設定
-        self.num_of_objects = 15
+        self.num_of_objects = 10
         #self.obj_poss_list = utils.make_obj_poss_list(self.num_of_objects,self.map_size)#objectの位置のリスト
 
         #報酬の設定
@@ -51,7 +51,7 @@ class Pybullet_env_handle_local(gym.Env):
         self.collision_reward = -0.5
         
         #1epidodeでの最大step数
-        self._max_episode_steps = 1000
+        self._max_episode_steps = 100000
 
         
         #mapの一辺の大きさ
@@ -158,6 +158,12 @@ class Pybullet_env_handle_local(gym.Env):
             ob_id = env_utils.make_object(urdf_path="./URDF/cube.urdf", start_pos=obj_poss_list, start_orientation=obj_orientation)
             self.obj_id_list.append(ob_id)
 
+        # 壁の作成
+        wall_objId = env_utils.make_wall("./URDF/wall2.urdf", self.map_size)
+        for i in range(3):
+            self.obj_id_list.append(wall_objId[i])
+
+
         #p.stepSimulation()
         #reward = self.get_reward
         
@@ -176,7 +182,7 @@ class Pybullet_env_handle_local(gym.Env):
     #goal判定
     def is_goal(self):
         flag = False
-        self.error = 0.1 #positionの許容範囲
+        self.error = 1.0 #positionの許容範囲
         if (self.goal_pos_list[0]-self.error<self.position[0]<self.goal_pos_list[0]+self.error)\
                 and (self.goal_pos_list[1]-self.error<self.position[1]<self.goal_pos_list[1]+self.error):
             flag = True

@@ -44,7 +44,7 @@ class Pybullet_env_handle_line_local(gym.Env):
         # self.orientation = p.getQuaternionFromEuler([0, 0, 0])#初期クオータニオン
 
         # オブジェクトの位置の設定
-        self.num_of_objects = 15
+        self.num_of_objects = 5
         # self.obj_poss_list = utils.make_obj_poss_list(self.num_of_objects,self.map_size)#objectの位置のリスト
 
         # 報酬の設定
@@ -56,7 +56,7 @@ class Pybullet_env_handle_line_local(gym.Env):
 
         # mapの一辺の大きさ
         # self.map_size = 6
-        self.map_size_x = 8
+        self.map_size_x = 4
         self.map_size_y = 2
 
     # actionを実行し、結果を返す
@@ -97,9 +97,9 @@ class Pybullet_env_handle_line_local(gym.Env):
                 reward = self.goal_reward
                 break
             elif self.is_collision() == True:
-                done =True #当たっても終わりにしない
+                #done =True #当たっても終わりにしない
                 reward = self.collision_reward
-                break
+                #break
             """elif self.step_num > self._max_episode_steps:
                 done = True
                 break"""
@@ -144,7 +144,7 @@ class Pybullet_env_handle_line_local(gym.Env):
         self.goal_x = 5  # x座標5がgoal
 
         # 車の読み込み
-        self.position = [-6, 0, 0]  # 初期位置
+        self.position = [-3, 0, 0]  # 初期位置
         self.orientation = p.getQuaternionFromEuler([0, 0, 0])  # 初期クオータニオン
         self.carId = p.loadURDF("racecar/racecar.urdf", self.position, self.orientation)
 

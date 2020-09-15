@@ -97,9 +97,9 @@ class Pybullet_env_handle_line(gym.Env):
                 reward = self.goal_reward
                 break
             elif self.is_collision() == True:
-                done =True #当たっても終わりにしない
+                #done =True #当たっても終わりにしない
                 reward = self.collision_reward
-                break
+                #break
             """elif self.step_num > self._max_episode_steps:
                 done = True
                 break"""
